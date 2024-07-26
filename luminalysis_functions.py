@@ -28,6 +28,15 @@ def example_cases(df, sortcol = 'tco', solar = False, co2_intensity = 171/1000, 
 
     return case1, case2, case3, case4, case5
 
+def mod_solar(df, co2_flag = True, co2_intensity = 171/1000):
+     
+     if co2_flag == True:
+        df['total_co2_modified'] = df.total_co2 + df.electricity_injected * co2_intensity
+    
+     df['epc_ind_modified'] = df.epc_ind + df.electricity_injected * 2.5 / df.total_floor_area
+
+     return df
+
 def fit_co2(central_scenario = ELEC_CO2_INTENSITY, electrification_scenario = ELEC_CO2_INTENSITY_ELECTRIFICATION, returnplot = False):
     # Convert dictionary to arrays
     years = np.array(list(central_scenario.keys()))
@@ -74,7 +83,7 @@ def fit_co2(central_scenario = ELEC_CO2_INTENSITY, electrification_scenario = EL
     else:
         return x_fit, y_fit_central, y_fit_electrification
 
-def dynamic_co2(df, years, scenario, start_year = 2025):
+def dynamic_co2(df, years, scenario, start_year = 2025, solar = False):
     if start_year not in years:
         print('year is not in the provided years array')
     if len(scenario) != len(years):
@@ -91,15 +100,21 @@ def dynamic_co2(df, years, scenario, start_year = 2025):
     # Calculate emissions for each year and store in new columns
     for year in range(len(scenario)):
         co2_electricity = scenario[year]
-        print(year + 2025, co2_electricity)
         df[f'emissions_{year + start_year}'] = (
             df['electricity_consumption'] * co2_electricity +
             df['gas_consumption'] * co2_intensity_gas +
             df['oil_consumption'] * co2_intensity_oil -
             df['electricity_injected'] * co2_electricity
         )
+        if solar == True:
+            df[f'modified_emissions_{year + start_year}'] = (
+                df['electricity_consumption'] * co2_electricity +
+                df['gas_consumption'] * co2_intensity_gas +
+                df['oil_consumption'] * co2_intensity_oil
+            )
 
     df['total_emissions'] = df[[f'emissions_{year + start_year}' for year in range(len(scenario))]].sum(axis=1)
-
+    df['modified_total_emissions'] = df[[f'modified_emissions_{year + start_year}' for year in range(len(scenario))]].sum(axis=1)
+    
     return df
 
