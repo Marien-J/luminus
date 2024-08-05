@@ -62,10 +62,10 @@ def fit_co2(central_scenario = ELEC_CO2_INTENSITY, electrification_scenario = EL
 
     # Plot the data and the fit
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x = years, y = central_scenario, mode = 'markers', name = 'central scenario'))
-    fig.add_trace(go.Scatter(x = years, y = electrification_scenario, mode = 'markers', name = 'electrification scenario'))
-    fig.add_trace(go.Scatter(x = x_fit, y = y_fit_central, mode = 'lines', name = 'central fit'))
-    fig.add_trace(go.Scatter(x = x_fit, y = y_fit_electrification, mode = 'lines', name = 'electrification fit'))
+    fig.add_trace(go.Scatter(x = years, y = central_scenario, mode = 'markers', name = 'central scenario', marker_color = 'green'))
+    fig.add_trace(go.Scatter(x = years, y = electrification_scenario, mode = 'markers', name = 'electrification scenario', marker_color = 'blue'))
+    fig.add_trace(go.Scatter(x = x_fit, y = y_fit_central, mode = 'lines', name = 'central fit', marker_color = 'green'))
+    fig.add_trace(go.Scatter(x = x_fit, y = y_fit_electrification, mode = 'lines', name = 'electrification fit', marker_color = 'blue'))
     legendict = dict(
         yanchor="top",
         y=0.99,
@@ -74,7 +74,7 @@ def fit_co2(central_scenario = ELEC_CO2_INTENSITY, electrification_scenario = EL
         bgcolor = 'RGBA(255,255,255,0.4)'
         )
     fig.update_traces( marker = dict(size = 8),)
-    fig.update_layout(width = 400, height = 400, legend = legendict,
+    fig.update_layout(width = 800, height = 400, legend = legendict,
                     
                     margin={'l': 50, 'b': 10, 't': 10, 'r': 40},
                     xaxis_title="Year", yaxis_title='CO₂ intensity (kg/kWh)')
@@ -106,13 +106,15 @@ def dynamic_co2(df, years, scenario, start_year = 2025, solar = False):
             df['oil_consumption'] * co2_intensity_oil -
             df['electricity_injected'] * co2_electricity
         )
+        df[f'fossil_emissions_{year + start_year}'] = df['gas_consumption'] * co2_intensity_gas + df.oil_consumption * co2_intensity_oil
+        df[f'electricity_emissions_{year + start_year}'] =df['electricity_consumption'] * co2_electricity
         if solar == True:
             df[f'modified_emissions_{year + start_year}'] = (
                 df['electricity_consumption'] * co2_electricity +
                 df['gas_consumption'] * co2_intensity_gas +
                 df['oil_consumption'] * co2_intensity_oil
             )
-
+    #df['gas_emissions'] = df['gas_consumption'] * co2_intensity_gas
     df['total_emissions'] = df[[f'emissions_{year + start_year}' for year in range(len(scenario))]].sum(axis=1)
     df['modified_total_emissions'] = df[[f'modified_emissions_{year + start_year}' for year in range(len(scenario))]].sum(axis=1)
     
