@@ -10,7 +10,7 @@ GAS_PRICE = {        'BE': 0.0994, #SOURCE EUROSTAT
                      'NL': 0.1500,
                      'DE': 0.1145}
 
-INJECTION_PRICE = {        'BE': 0.06, #SOURCE EUROSTAT
+INJECTION_PRICE = {        'BE': 0.06, 
                      'FR': 0.06,
                      'NL': 0.06,
                      'DE': 0.06}

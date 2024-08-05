@@ -13,7 +13,7 @@ import dash_daq as daq
 # import sys
 # from pathlib import Path
 # sys.path.append(str(Path(__file__).parent))
-from figure_functions import barchart_heating_systems, boxplot_co2, boxplot_investment
+from figure_functions import barchart_heating_systems, boxplot_co2, boxplot_investment, boxplot_co2_abatement, boxplot_electricity_consumption
 from constants import INJECTION_PRICE, GAS_PRICE, ELECTRICITY_PRICE
 from tab_layout import make_layout_scenario_maker, make_sliders
 from server import app
@@ -38,9 +38,10 @@ df_plot = pd.concat([
 figure = barchart_heating_systems(df_plot, dataset = 'dataset')
 figure2 = boxplot_co2(df_plot)
 figure3 = boxplot_investment(df_plot)
-
+figure4 = boxplot_co2_abatement(df_plot)
+figure5 = boxplot_electricity_consumption(df_plot)
 label_sliders, economic_sliders = make_sliders()
-layout_scenario_maker = make_layout_scenario_maker(figure, figure2, figure3, label_sliders, economic_sliders)
+layout_scenario_maker = make_layout_scenario_maker(figure, figure2, figure3, figure4, figure5, label_sliders, economic_sliders)
 #app.layout = make_layout_scenario_maker(figure, label_sliders, economic_sliders)
 
 
@@ -111,6 +112,8 @@ def display_rent_slider(drag_value):
     Output("bar-graph", "figure"),
      Output('figure2','figure' ),
      Output('figure3','figure' ),
+     Output('figure4','figure' ),
+     Output('figure5','figure' ),
     [Input("submit-button-labels", "n_clicks"),
      State("building", "value"),
      State("electricity_slider_input", "drag_value"),
@@ -134,12 +137,12 @@ def update_figures(buttonval, extrapolation,
     df['tco'] = df.total_investment_cost + df.electricity_consumption*time_horizon*electricity_price + df.gas_consumption*gas_price * time_horizon + df.total_oil_cost -df.electricity_injected * INJECTION_PRICE['BE'] * time_horizon
     df['total_co2'] = df.electricity_consumption * co2_intensity + df.oil_consumption * 0.074 * 3.6 + df.gas_consumption * 0.056 * 3.6 - df['electricity_injected'] * co2_intensity
     current = df[df.scenario_name == 'current situation']
-    current['heating_system'] = 'Heat Pump'
+    current.loc[:,'heating_system'] = 'Heat Pump'
     current.loc[(current.gas_consumption > current.domestic_hot_water_consumption) & (current.oil_consumption == 0), 'heating_system' ] = 'Gasboiler'
     current.loc[(current.oil_consumption >= current.heating_consumption), 'heating_system' ] = 'Oil'
-    current['dataset'] = 'Current Situation'
+    current.loc[:, 'dataset'] = 'Current Situation'
     optimal_unmodded = df[df.epc_ind <= 100].sort_values(by = 'tco', ascending = True).drop_duplicates(subset = 'name', keep = 'first')
-    optimal_unmodded['dataset'] = 'Flemish A Label'
+    optimal_unmodded.loc[:,'dataset'] = 'Flemish A Label'
     
 
     
@@ -178,7 +181,9 @@ def update_figures(buttonval, extrapolation,
     figure = barchart_heating_systems(df_plot, dataset = 'dataset', extrapolation = extrapolation)
     figure2 = boxplot_co2(df_plot, extrapolation= extrapolation)
     figure3 = boxplot_investment(df_plot, extrapolation=extrapolation)
-    return figure, figure2, figure3
+    figure4 = boxplot_co2_abatement(df_plot, extrapolation = extrapolation)
+    figure5 = boxplot_electricity_consumption(df_plot, extrapolation = extrapolation)
+    return figure, figure2, figure3, figure4, figure5
 
     
     

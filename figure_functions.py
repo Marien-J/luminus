@@ -51,3 +51,29 @@ def boxplot_co2(combined_df, extrapolation = 'standard archetypes'):
         boxmode='group'
         )
         return fig
+
+def boxplot_co2_abatement(combined_df, extrapolation = 'standard archetypes'):
+        combined_df = combined_df.sort_values('dataset', ascending = True)
+        fig = go.Figure()
+        combined_df['CO2_abt_cost'] = combined_df.total_investment_cost / combined_df.total_co2
+        fig.add_trace(go.Box(x=[combined_df['building_type'], combined_df['dataset']], 
+                             y = combined_df['CO2_abt_cost'] if extrapolation != 'extrapolated' else combined_df['total_co2'] * combined_df['scale_kadaster'], ),)
+        fig.update_layout(
+        xaxis_title='Building Type',
+        yaxis_title='CO2 Abatement Cost [€/Tonne CO2]',
+        boxmode='group'
+        )
+        return fig
+
+def boxplot_electricity_consumption(combined_df, extrapolation = 'standard archetypes'):
+        combined_df = combined_df.sort_values('dataset', ascending = True)
+        fig = go.Figure()
+        combined_df['CO2_abt_cost'] = combined_df.total_investment_cost / combined_df.total_co2
+        fig.add_trace(go.Box(x=[combined_df['building_type'], combined_df['dataset']], 
+                             y = combined_df['electricity_consumption'] if extrapolation != 'extrapolated' else combined_df['electricity_consumption'] * combined_df['scale_kadaster'], ),)
+        fig.update_layout(
+        xaxis_title='Building Type',
+        yaxis_title='Electricity Consumption [kWh]',
+        boxmode='group'
+        )
+        return fig

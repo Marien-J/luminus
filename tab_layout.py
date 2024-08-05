@@ -32,7 +32,7 @@ def make_layout(figure):
     )
     return layout_dennis
 
-def make_layout_scenario_maker(figure, figure2, figure3, label_slider, economic_slider,):
+def make_layout_scenario_maker(figure, figure2, figure3, figure4, figure5, label_slider, economic_slider,):
     layout_kakker = dbc.Container(
         [
             html.Hr(),
@@ -82,6 +82,10 @@ def make_layout_scenario_maker(figure, figure2, figure3, label_slider, economic_
                     dbc.Row([
                         dbc.Col(dcc.Graph(id='figure2', figure=figure2), width=6),
                         dbc.Col(dcc.Graph(id='figure3', figure=figure3), width=6),
+                ]),
+                dbc.Row([
+                        dbc.Col(dcc.Graph(id='figure4', figure=figure4), width=6),
+                        dbc.Col(dcc.Graph(id='figure5', figure=figure5), width=6),
                 ]),
                 ], width=9)
             ]),
